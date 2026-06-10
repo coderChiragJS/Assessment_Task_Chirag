@@ -21,6 +21,8 @@ export function buildActivity({ actor, entityType, entityId, action, metadata = 
   };
 }
 
+// test?
+
 export async function recordActivity(args) {
   return activityRepo.create(buildActivity(args));
 }
