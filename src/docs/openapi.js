@@ -438,7 +438,7 @@ export const openapiSpec = {
             name: 'teamId',
             in: 'query',
             schema: { type: 'string' },
-            description: 'Admin only: target a specific team',
+            description: 'Admin only: target a specific teams',
           },
         ],
         responses: {
