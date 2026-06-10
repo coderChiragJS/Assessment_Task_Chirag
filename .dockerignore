@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.env.*
+.DS_Store
+.DynamoDBLocal/
+dynamodb-local-metadata.json
+shared-local-instance.db
+*.log
+tests
+postman_collection.json
