@@ -14,7 +14,10 @@ export const openapiSpec = {
       'Task management with role-based access control, an immutable activity log, ' +
       'enforced status workflow, and role-scoped dashboards. Built on Express + DynamoDB.',
   },
-  servers: [{ url: `http://localhost:${env.PORT}`, description: 'Local' }],
+  servers: [
+    { url: '/', description: 'Current server' },
+    { url: `http://localhost:${env.PORT}`, description: 'Local' },
+  ],
   tags: [
     { name: 'Auth' },
     { name: 'Users' },
