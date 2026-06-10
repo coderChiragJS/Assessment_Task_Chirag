@@ -6,7 +6,7 @@ export function requirePermission(...permissions) {
     if (!req.user) return next(ApiError.unauthorized());
     const allowed = permissions.some((p) => roleHasPermission(req.user.role, p));
     if (!allowed) {
-      return next(ApiError.forbidden('You do not have permission to perform this action'));
+      return next(ApiError.forbidden('You do not have permission'));
     }
     next();
   };
