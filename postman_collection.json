@@ -1,0 +1,242 @@
+{
+  "info": {
+    "name": "Smart Internal Operations System",
+    "description": "Task management with RBAC, activity log, status workflow, and role-scoped dashboards. Run the 'Auth > Login' request first - it auto-saves the access token to the {{accessToken}} collection variable used by every other request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "taskId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"new@smartops.dev\",\n  \"password\": \"Passw0rd\"\n}" }
+          }
+        },
+        {
+          "name": "Login (admin) - saves token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json().data;",
+                  "pm.collectionVariables.set('accessToken', d.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', d.refreshToken);",
+                  "pm.test('logged in', () => pm.expect(d.accessToken).to.be.a('string'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@smartops.dev\",\n  \"password\": \"Admin@123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (manager)",
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.collectionVariables.set('accessToken', pm.response.json().data.accessToken);"], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"manager@smartops.dev\",\n  \"password\": \"Manager@123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (user)",
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.collectionVariables.set('accessToken', pm.response.json().data.accessToken);"], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user1@smartops.dev\",\n  \"password\": \"User@123\"\n}" }
+          }
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] },
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          }
+        },
+        {
+          "name": "Me",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] } }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Dev One\",\n  \"email\": \"dev1@smartops.dev\",\n  \"password\": \"Passw0rd\",\n  \"role\": \"USER\"\n}" }
+          }
+        },
+        { "name": "List users", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] } } },
+        {
+          "name": "Change role",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/:id/role", "host": ["{{baseUrl}}"], "path": ["users", ":id", "role"], "variable": [{ "key": "id", "value": "" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"MANAGER\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "Create team",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/teams", "host": ["{{baseUrl}}"], "path": ["teams"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Engineering\"\n}" }
+          }
+        },
+        { "name": "List teams", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teams", "host": ["{{baseUrl}}"], "path": ["teams"] } } },
+        { "name": "Get team + members", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/teams/:id", "host": ["{{baseUrl}}"], "path": ["teams", ":id"], "variable": [{ "key": "id", "value": "" }] } } }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create task - saves taskId",
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.collectionVariables.set('taskId', pm.response.json().data.task.taskId);"], "type": "text/javascript" } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tasks", "host": ["{{baseUrl}}"], "path": ["tasks"] },
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Investigate latency spike\",\n  \"description\": \"p95 jumped after the 14:00 deploy\",\n  \"priority\": \"HIGH\"\n}" }
+          }
+        },
+        {
+          "name": "List tasks (filters + pagination)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tasks?status=TODO&priority=HIGH&q=latency&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [
+                { "key": "status", "value": "TODO" },
+                { "key": "priority", "value": "HIGH" },
+                { "key": "q", "value": "latency" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        { "name": "Get task", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}"] } } },
+        {
+          "name": "Update task",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"priority\": \"URGENT\"\n}" }
+          }
+        },
+        {
+          "name": "Assign task",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}/assign", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}", "assign"] },
+            "body": { "mode": "raw", "raw": "{\n  \"assigneeId\": \"<user-id>\"\n}" }
+          }
+        },
+        {
+          "name": "Change status (workflow-enforced)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}/status", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}" }
+          }
+        },
+        { "name": "Delete task", "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}"] } } }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        { "name": "List comments", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}/comments", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}", "comments"] } } },
+        {
+          "name": "Add comment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tasks/{{taskId}}/comments", "host": ["{{baseUrl}}"], "path": ["tasks", "{{taskId}}", "comments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"body\": \"Rolling back the deploy to confirm.\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activity",
+      "item": [
+        { "name": "My activity", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/activity/me", "host": ["{{baseUrl}}"], "path": ["activity", "me"] } } },
+        { "name": "Task audit trail", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/activity/task/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["activity", "task", "{{taskId}}"] } } },
+        { "name": "User activity (admin)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/activity/user/:userId", "host": ["{{baseUrl}}"], "path": ["activity", "user", ":userId"], "variable": [{ "key": "userId", "value": "" }] } } }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        { "name": "Dashboard (role-scoped)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/dashboard", "host": ["{{baseUrl}}"], "path": ["dashboard"] } } }
+      ]
+    },
+    {
+      "name": "Insights (Invented Feature)",
+      "item": [
+        {
+          "name": "Workflow Bottleneck Detector",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/insights/bottlenecks",
+              "host": ["{{baseUrl}}"],
+              "path": ["insights", "bottlenecks"]
+            },
+            "description": "Login as manager/admin first. Diagnoses the stage where work gets stuck + lists tasks stuck longer than their stage average."
+          }
+        }
+      ]
+    }
+  ]
+}

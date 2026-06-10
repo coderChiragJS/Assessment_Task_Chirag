@@ -1,0 +1,7 @@
+node_modules/
+.env
+.DynamoDBLocal/
+dynamodb-local-metadata.json
+*.log
+.DS_Store
+shared-local-instance.db
